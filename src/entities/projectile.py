@@ -35,18 +35,24 @@ class Projectile(pygame.sprite.Sprite):
         self.direction = to_target.normalize() if to_target.length() > 0 else pygame.math.Vector2(0, 0)
         self.initial_pos = start_pos
     
-    def update(self):
-        # Update trail
-        self.trail_points.append(self.pos.copy())
-        if len(self.trail_points) > self.max_trail_length:
-            self.trail_points.pop(0)
+    def update(self, time_delta):
+        # Calculate direction to target
+        dx = self.target[0] - self.rect.centerx
+        dy = self.target[1] - self.rect.centery
+        distance = math.sqrt(dx * dx + dy * dy)
         
-        # Move towards target
-        self.pos += self.direction * self.speed
-        self.rect.center = self.pos
-        
-        if (self.pos - self.target).length() < self.speed:
-            self.kill()
+        if distance > 0:
+            # Move towards target with speed scaled by time_delta
+            speed = self.speed * time_delta * 60  # Scale to maintain same base speed
+            move_x = min(abs(dx), speed) * (dx / abs(dx)) if dx != 0 else 0
+            move_y = min(abs(dy), speed) * (dy / abs(dy)) if dy != 0 else 0
+            
+            self.rect.x += move_x
+            self.rect.y += move_y
+            
+            # Kill if we've reached the target
+            if distance < speed:
+                self.kill()
     
     def draw(self, surface):
         # Draw trail

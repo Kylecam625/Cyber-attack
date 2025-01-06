@@ -7,14 +7,12 @@ class WaveManager:
         self.current_wave = 0
         self.wave_in_progress = False
         self.enemies_to_spawn = []
-        self.last_spawn_time = 0
-        self.spawn_delay = 1000
-        self.wave_completed = True
+        self.spawn_delay = 1.0  # Seconds between enemy spawns
+        self.spawn_timer = 0.0  # Timer for next spawn
     
     def start_wave(self):
-        if self.wave_completed and self.current_wave < len(WAVE_CONFIGS):
+        if not self.wave_in_progress and self.current_wave < len(WAVE_CONFIGS):
             self.wave_in_progress = True
-            self.wave_completed = False
             wave_config = WAVE_CONFIGS[self.current_wave]
             
             # Create list of enemies to spawn
@@ -22,23 +20,27 @@ class WaveManager:
             for enemy_type, count in wave_config['enemies']:
                 self.enemies_to_spawn.extend([enemy_type] * count)
             
-            self.spawn_delay = wave_config['spawn_delay'] * 1000  # Convert to milliseconds
+            self.spawn_timer = wave_config.get('spawn_delay', 1.0)  # Get spawn delay or default to 1.0
             self.current_wave += 1
             return True
         return False
     
-    def update(self):
-        current_time = pygame.time.get_ticks()
+    def update(self, time_delta):
+        if not self.wave_in_progress:
+            return
         
-        # Spawn enemies
-        if self.wave_in_progress and self.enemies_to_spawn:
-            if current_time - self.last_spawn_time > self.spawn_delay:
-                enemy_type = self.enemies_to_spawn.pop(0)
-                self.game.spawn_enemy(enemy_type)
-                self.last_spawn_time = current_time
+        # Update spawn timer with time_delta
+        self.spawn_timer -= time_delta
+        
+        if self.spawn_timer <= 0 and self.enemies_to_spawn:
+            # Spawn next enemy
+            enemy_type = self.enemies_to_spawn.pop(0)
+            self.game.spawn_enemy(enemy_type)
+            
+            # Reset timer for next spawn
+            self.spawn_timer = self.spawn_delay
         
         # Check if wave is complete
-        if self.wave_in_progress and not self.enemies_to_spawn and not self.game.enemies:
+        if not self.enemies_to_spawn and not self.game.enemies:
             self.wave_in_progress = False
-            self.wave_completed = True
             self.game.wave_completed() 

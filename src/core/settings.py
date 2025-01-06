@@ -7,22 +7,77 @@ GAME_TITLE = "CS Tower Defense"
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
+RED = (255, 50, 50)
+GREEN = (50, 255, 100)
+BLUE = (50, 100, 255)
 GRAY = (128, 128, 128)
-YELLOW = (255, 255, 0)
-PURPLE = (128, 0, 128)
+YELLOW = (255, 255, 50)
+PURPLE = (180, 50, 255)
 BROWN = (139, 69, 19)
+CYAN = (0, 255, 255)
+ORANGE = (255, 165, 0)
+NEON_GREEN = (57, 255, 20)
+PINK = (255, 192, 203)
+
+# UI Colors
+UI_BACKGROUND = (40, 42, 54)  # Dark theme background
+UI_ACCENT = (98, 114, 164)    # Accent color
+UI_TEXT = (248, 248, 242)     # Light text
+UI_HOVER = (68, 71, 90)       # Hover state
+UI_SELECTED = (80, 250, 123)  # Selected state
+
+# Visual Effects
+GLOW_EFFECT = True
+PARTICLE_EFFECTS = True
+TRAIL_LENGTH = 5  # For projectile trails
+GLOW_RADIUS = 20
+GLOW_INTENSITY = 150  # Alpha value for glow effect
+
+# Tower Visual Settings
+TOWER_GLOW_COLORS = {
+    'basic_compiler': (50, 150, 255, 100),    # Light blue glow
+    'code_injector': (255, 100, 100, 100),    # Light red glow
+    'static_analyzer': (100, 255, 100, 100),  # Light green glow
+    'recursive_function': (255, 150, 50, 100), # Orange glow
+    'async_processor': (150, 50, 255, 100),   # Purple glow
+    'exception_handler': (255, 50, 50, 100),  # Red glow
+    'cache_freezer': (200, 200, 255, 100),    # Ice blue glow
+    'garbage_collector': (100, 255, 200, 100), # Mint green glow
+    'quantum_computer': (255, 215, 0, 100),   # Gold glow
+    'network_router': (50, 200, 200, 100),    # Teal glow
+    'bitcoin_miner': (255, 200, 0, 100),      # Yellow gold glow
+    'stack_overflow': (200, 200, 200, 100)    # Silver glow
+}
+
+# Enemy Visual Settings
+ENEMY_GLOW_COLORS = {
+    'syntax_error': (255, 50, 50, 100),    # Red glow
+    'logic_error': (50, 100, 255, 100),    # Blue glow
+    'memory_leak': (50, 255, 100, 100),    # Green glow
+    'trojan': (255, 255, 50, 100)          # Yellow glow
+}
 
 # Game Settings
 STARTING_MONEY = 650
 STARTING_LIVES = 100
+NORMAL_GAME_SPEED = 1.0
+FAST_FORWARD_SPEED = 2.0  # Double speed for fast forward
 
 # Path Settings
 TILE_SIZE = 32
 GRID_WIDTH = (WINDOW_WIDTH - 250) // TILE_SIZE  # Adjust for UI panel
 GRID_HEIGHT = WINDOW_HEIGHT // TILE_SIZE
+
+# Path Visual Settings
+PATH_GLOW = True
+PATH_PULSE_SPEED = 0.05  # Speed of path pulsing effect
+PATH_PULSE_MIN = 0.4    # Minimum path opacity
+PATH_PULSE_MAX = 0.8    # Maximum path opacity
+
+# Grid Visual Settings
+GRID_OPACITY = 0.15
+GRID_LINE_COLOR = (100, 100, 100)
+GRID_HOVER_COLOR = (150, 150, 150, 30)
 
 # Define the path waypoints (in grid coordinates)
 PATH_WAYPOINTS = [
@@ -41,68 +96,220 @@ PATH_WAYPOINTS = [
 # Enemy Settings
 ENEMY_TYPES = {
     'syntax_error': {
-        'health': 100,
+        'health': 1,
         'speed': 2,
-        'reward': 10,
+        'reward': 1,
         'damage': 1,
         'color': RED
     },
     'logic_error': {
-        'health': 200,
-        'speed': 1.5,
-        'reward': 20,
-        'damage': 2,
+        'health': 2,
+        'speed': 1.8,
+        'reward': 2,
+        'damage': 1,
         'color': BLUE
     },
     'memory_leak': {
-        'health': 400,
-        'speed': 1,
-        'reward': 35,
-        'damage': 3,
-        'color': PURPLE
+        'health': 3,
+        'speed': 1.6,
+        'reward': 3,
+        'damage': 1,
+        'color': GREEN
     },
     'trojan': {
-        'health': 150,
-        'speed': 3,
-        'reward': 25,
-        'damage': 2,
-        'color': GREEN
+        'health': 4,
+        'speed': 3.2,
+        'reward': 4,
+        'damage': 1,
+        'color': YELLOW
     }
 }
 
 # Tower Settings
 TOWER_TYPES = {
-    'firewall': {
-        'cost': 100,
-        'damage': 20,
-        'range': 150,
-        'cooldown': 0.3,
-        'color': BLUE,
-        'description': 'Basic tower with balanced stats'
-    },
-    'debugger': {
+    'basic_compiler': {  # Dart Monkey equivalent
         'cost': 200,
-        'damage': 50,
-        'range': 180,
-        'cooldown': 0.8,
-        'color': GREEN,
-        'description': 'High damage, slow attack speed'
+        'damage': 1,
+        'range': 150,
+        'cooldown': 0.95,
+        'color': (50, 150, 255),  # Light blue
+        'description': 'Basic compiler that catches simple syntax errors. Fast compilation, low processing power.'
     },
-    'antivirus': {
+    'code_injector': {  # Tack Shooter equivalent
+        'cost': 360,
+        'damage': 1,
+        'range': 100,
+        'cooldown': 1.2,
+        'color': (255, 100, 100),  # Light red
+        'description': 'Injects code in all directions, short range but good coverage.'
+    },
+    'static_analyzer': {  # Sniper Monkey equivalent
         'cost': 350,
-        'damage': 30,
-        'range': 140,
-        'cooldown': 0.2,
-        'color': RED,
-        'description': 'Fast attack speed, area damage'
+        'damage': 2,
+        'range': 1000,  # Unlimited range
+        'cooldown': 2.0,
+        'color': (100, 255, 100),  # Light green
+        'description': 'Long-range code analysis, high damage but slow processing speed.'
     },
-    'encryption': {
+    'recursive_function': {  # Boomerang equivalent
+        'cost': 380,
+        'damage': 3,
+        'range': 180,
+        'cooldown': 1.5,
+        'color': (255, 150, 50),  # Orange
+        'description': 'Throws recursive calls that return to source, hitting bugs multiple times.'
+    },
+    'async_processor': {  # Ninja Monkey equivalent
+        'cost': 500,
+        'damage': 1,
+        'range': 130,
+        'cooldown': 0.5,
+        'color': (150, 50, 255),  # Purple
+        'description': 'Fast async operations that can detect hidden memory leaks.'
+    },
+    'exception_handler': {  # Bomb Tower equivalent
+        'cost': 650,
+        'damage': 3,
+        'range': 140,
+        'cooldown': 1.8,
+        'color': (255, 50, 50),  # Red
+        'description': 'Throws exceptions that explode on impact, affecting all nearby bugs.'
+    },
+    'cache_freezer': {  # Ice Tower equivalent
         'cost': 300,
-        'damage': 15,
+        'damage': 1,
+        'range': 100,
+        'cooldown': 1.0,
+        'color': (200, 200, 255),  # Ice blue
+        'description': 'Freezes processes in cache, slowing down bugs temporarily.'
+    },
+    'garbage_collector': {  # Glue Gunner equivalent
+        'cost': 270,
+        'damage': 1,
         'range': 120,
-        'cooldown': 0.3,
-        'color': PURPLE,
-        'description': 'Slows enemies in range'
+        'cooldown': 1.1,
+        'color': (100, 255, 200),  # Mint green
+        'description': 'Marks bugs for garbage collection, slowing them down.'
+    },
+    'quantum_computer': {  # Super Monkey equivalent
+        'cost': 3500,
+        'damage': 1,
+        'range': 200,
+        'cooldown': 0.1,
+        'color': (255, 215, 0),  # Gold
+        'description': 'Extremely fast quantum calculations, massive processing power.'
+    },
+    'network_router': {  # Monkey Village equivalent
+        'cost': 1600,
+        'damage': 0,
+        'range': 150,
+        'cooldown': 0,
+        'color': (50, 200, 200),  # Teal
+        'description': 'Improves nearby towers through network optimization.'
+    },
+    'bitcoin_miner': {  # Banana Farm equivalent
+        'cost': 1000,
+        'damage': 0,
+        'range': 0,
+        'cooldown': 10.0,
+        'color': (255, 200, 0),  # Yellow gold
+        'description': 'Generates cryptocurrency over time for additional income.'
+    },
+    'stack_overflow': {  # Spike Factory equivalent
+        'cost': 750,
+        'damage': 5,
+        'range': 100,
+        'cooldown': 3.0,
+        'color': (200, 200, 200),  # Silver
+        'description': 'Creates stack overflow errors that damage bugs passing over them.'
+    }
+}
+
+# Tower Descriptions with strengths and weaknesses
+TOWER_INFO = {
+    'basic_compiler': {
+        'name': 'Basic Compiler',
+        'role': 'Early Game Defense',
+        'strengths': '- Fast attack speed\n- Good all-around tower\n- Cheap and efficient',
+        'weaknesses': '- Low damage\n- Limited range\n- No special abilities',
+        'tips': 'Perfect for early waves. Place multiple for better coverage.'
+    },
+    'code_injector': {
+        'name': 'Code Injector',
+        'role': 'Area Control',
+        'strengths': '- Hits multiple targets\n- 360-degree coverage\n- Good for clusters',
+        'weaknesses': '- Short range\n- Moderate damage\n- Fixed attack pattern',
+        'tips': 'Place at intersections or where paths overlap.'
+    },
+    'static_analyzer': {
+        'name': 'Static Analyzer',
+        'role': 'Long Range Support',
+        'strengths': '- Unlimited range\n- High single-target damage\n- Can hit anywhere',
+        'weaknesses': '- Slow attack speed\n- No splash damage\n- Expensive upgrades',
+        'tips': 'Place in central locations to cover the entire map.'
+    },
+    'recursive_function': {
+        'name': 'Recursive Function',
+        'role': 'Multi-Hit Specialist',
+        'strengths': '- Hits enemies multiple times\n- Good pierce\n- Medium range',
+        'weaknesses': '- Complex attack pattern\n- Moderate speed\n- Path dependent',
+        'tips': 'Place near straight paths for maximum effectiveness.'
+    },
+    'async_processor': {
+        'name': 'Async Processor',
+        'role': 'Fast Attack Specialist',
+        'strengths': '- Very fast attack speed\n- Can detect camo\n- Reliable damage',
+        'weaknesses': '- Low damage per hit\n- Medium range\n- Higher cost',
+        'tips': 'Great for dealing with fast enemies and swarms.'
+    },
+    'exception_handler': {
+        'name': 'Exception Handler',
+        'role': 'Area Damage',
+        'strengths': '- Splash damage\n- High damage potential\n- Good against groups',
+        'weaknesses': '- Slow attack speed\n- Limited range\n- Can miss fast targets',
+        'tips': 'Use for grouped enemies and at choke points.'
+    },
+    'cache_freezer': {
+        'name': 'Cache Freezer',
+        'role': 'Crowd Control',
+        'strengths': '- Slows enemies\n- Area effect\n- Support tower',
+        'weaknesses': '- No direct damage\n- Short range\n- Some enemies immune',
+        'tips': 'Combine with high damage towers for best results.'
+    },
+    'garbage_collector': {
+        'name': 'Garbage Collector',
+        'role': 'Debuff Specialist',
+        'strengths': '- Permanent slow\n- Affects all types\n- Stackable effect',
+        'weaknesses': '- Very low damage\n- Single target\n- Support focused',
+        'tips': 'Place early in the track to maximize slow duration.'
+    },
+    'quantum_computer': {
+        'name': 'Quantum Computer',
+        'role': 'Super Tower',
+        'strengths': '- Extremely fast attacks\n- High DPS\n- Large range',
+        'weaknesses': '- Very expensive\n- High upgrade costs\n- Power hungry',
+        'tips': 'Save up for late game. Worth the investment.'
+    },
+    'network_router': {
+        'name': 'Network Router',
+        'role': 'Support',
+        'strengths': '- Buffs nearby towers\n- Multiple effects\n- Stackable buffs',
+        'weaknesses': '- No direct damage\n- Expensive\n- Requires other towers',
+        'tips': 'Place in areas with many other towers.'
+    },
+    'bitcoin_miner': {
+        'name': 'Bitcoin Miner',
+        'role': 'Income Generator',
+        'strengths': '- Generates money\n- Self-sustaining\n- Long term value',
+        'weaknesses': '- No attack ability\n- High initial cost\n- Takes time to profit',
+        'tips': 'Build early for maximum profit over time.'
+    },
+    'stack_overflow': {
+        'name': 'Stack Overflow',
+        'role': 'Area Denial',
+        'strengths': '- Persistent damage\n- Area control\n- Good backup defense',
+        'weaknesses': '- Limited duration\n- Random targeting\n- Moderate cost',
+        'tips': 'Use to protect end of track or create safe zones.'
     }
 }
 

@@ -54,12 +54,12 @@ class Enemy(pygame.sprite.Sprite):
         # Path following
         self.path_points = path_points
         self.path_index = 0
+        self.reached_end = False
         
-        # Convert grid coordinates to pixel coordinates
+        # Convert grid coordinates to pixel coordinates for starting position
         start_x = path_points[0][0] * TILE_SIZE + TILE_SIZE // 2
         start_y = path_points[0][1] * TILE_SIZE + TILE_SIZE // 2
-        self.pos = pygame.math.Vector2(start_x, start_y)
-        self.rect.center = self.pos
+        self.rect.center = (start_x, start_y)
         
         # Stats
         self.max_health = self.stats['health']
@@ -84,31 +84,40 @@ class Enemy(pygame.sprite.Sprite):
             pygame.draw.rect(surface, health_color, 
                            (bar_pos[0], bar_pos[1], health_width, bar_height))
     
-    def move(self):
-        if self.path_index < len(self.path_points) - 1:
-            # Get current target point in pixels
-            target_x = self.path_points[self.path_index + 1][0] * TILE_SIZE + TILE_SIZE // 2
-            target_y = self.path_points[self.path_index + 1][1] * TILE_SIZE + TILE_SIZE // 2
-            target = pygame.math.Vector2(target_x, target_y)
+    def update(self, time_delta):
+        if self.path_index >= len(self.path_points) - 1:
+            self.reached_end = True
+            return
             
-            # Calculate direction to target
-            to_target = target - self.pos
-            distance = to_target.length()
-            
-            if distance < self.speed:
-                # Reached the current target point
-                self.pos = target
-                self.path_index += 1
-            else:
-                # Move towards target
-                direction = to_target.normalize()
-                self.pos += direction * self.speed
-            
-            self.rect.center = self.pos
+        # Get current and next points
+        current = self.path_points[self.path_index]
+        next_point = self.path_points[self.path_index + 1]
+        
+        # Convert grid coordinates to pixels
+        next_pos = (next_point[0] * TILE_SIZE + TILE_SIZE // 2,
+                   next_point[1] * TILE_SIZE + TILE_SIZE // 2)
+        
+        # Calculate direction and distance
+        dx = next_pos[0] - self.rect.centerx
+        dy = next_pos[1] - self.rect.centery
+        distance = math.sqrt(dx * dx + dy * dy)
+        
+        # Move towards next point with speed scaled by time_delta
+        speed = self.stats['speed'] * time_delta * 60  # Scale to maintain same base speed
+        
+        # If we're very close to the target point or can reach it this frame
+        if distance <= speed or distance < 1:
+            # Snap to the waypoint
+            self.rect.centerx = next_pos[0]
+            self.rect.centery = next_pos[1]
+            self.path_index += 1
+        else:
+            # Move proportionally
+            move_x = (dx / distance) * speed
+            move_y = (dy / distance) * speed
+            self.rect.x += move_x
+            self.rect.y += move_y
     
     def take_damage(self, amount):
         self.health -= amount
-        return self.health <= 0
-    
-    def update(self):
-        self.move() 
+        return self.health <= 0 

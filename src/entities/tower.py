@@ -19,8 +19,8 @@ class Tower(pygame.sprite.Sprite):
         # Stats
         self.damage = self.stats['damage']
         self.range = self.stats['range']
-        self.cooldown = self.stats['cooldown'] * 1000
-        self.last_shot = 0
+        self.cooldown = self.stats['cooldown']
+        self.cooldown_remaining = 0  # Initialize cooldown timer
         
         # Tower stats tracking
         self.enemies_defeated = 0
@@ -29,38 +29,33 @@ class Tower(pygame.sprite.Sprite):
         
         # Selection state
         self.selected = False
+        self.current_target = None
     
     def can_shoot(self):
         now = pygame.time.get_ticks()
-        can_shoot = now - self.last_shot >= self.cooldown
-        if can_shoot:
-            print(f"{self.type} tower at {self.rect.center} can shoot")
-        return can_shoot
+        return now - self.last_shot >= self.cooldown
     
     def get_target(self, enemies):
-        closest_enemy = None
-        closest_dist = self.range  # Use range as the maximum distance
+        in_range_enemies = []
         
-        print(f"\nChecking targets for {self.type} tower at {self.rect.center}")
-        print(f"Number of enemies: {len(enemies)}")
-        
+        # First, find all enemies in range
         for enemy in enemies:
             dist = math.hypot(
                 enemy.rect.centerx - self.rect.centerx,
                 enemy.rect.centery - self.rect.centery
             )
-            print(f"Enemy at {enemy.rect.center}, distance: {dist}, range: {self.range}")
-            if dist < closest_dist:
-                closest_dist = dist
-                closest_enemy = enemy
+            if dist < self.range:
+                in_range_enemies.append((enemy, enemy.path_index))
         
-        if closest_enemy:
-            print(f"Found target at distance {closest_dist}")
-        else:
-            print("No target found in range")
-            
-        self.current_target = closest_enemy
-        return closest_enemy
+        if not in_range_enemies:
+            return None
+        
+        # Sort by path index (descending) to target enemies furthest along the path
+        in_range_enemies.sort(key=lambda x: x[1], reverse=True)
+        
+        # Return the enemy furthest along the path
+        self.current_target = in_range_enemies[0][0]
+        return self.current_target
     
     def shoot(self, target, projectiles):
         self.last_shot = pygame.time.get_ticks()
@@ -106,19 +101,23 @@ class Tower(pygame.sprite.Sprite):
             f"Damage Dealt: {self.damage_dealt}"
         ]
     
-    def update(self, enemies=None, projectiles=None):
-        print(f"\n{self.type} tower update:")
-        if enemies is None or projectiles is None:
-            print("No enemies or projectiles provided to tower update")
-            return
-        
-        print(f"Enemies provided: {len(enemies)}")
-        print(f"Can shoot: {self.can_shoot()}")
-        
-        if self.can_shoot():
+    def update(self, enemies, projectiles, time_delta):
+        if self.cooldown_remaining <= 0:
+            # Find target
             target = self.get_target(enemies)
-            print(f"Got target: {target is not None}")
             if target:
-                print("Attempting to shoot...")
-                self.shoot(target, projectiles)
-                print(f"Projectiles after shoot: {len(projectiles)}") 
+                # Create projectile
+                projectile = Projectile(
+                    self.rect.center,
+                    target.rect.center,
+                    self.stats['damage'],
+                    speed=8,
+                    color=WHITE
+                )
+                projectiles.add(projectile)
+                self.shots_fired += 1
+                self.current_target = target
+                self.cooldown_remaining = self.cooldown
+        else:
+            # Update cooldown with time_delta
+            self.cooldown_remaining = max(0, self.cooldown_remaining - time_delta) 
