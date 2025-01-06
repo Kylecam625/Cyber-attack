@@ -1,0 +1,34 @@
+cs_tower_defense/
+├── assets/
+│   ├── images/
+│   │   ├── enemies/
+│   │   ├── towers/
+│   │   ├── projectiles/
+│   │   └── ui/
+│   ├── sounds/
+│   │   ├── effects/
+│   │   └── music/
+│   └── maps/
+├── src/
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── game.py
+│   │   ├── settings.py
+│   │   └── states.py
+│   ├── entities/
+│   │   ├── __init__.py
+│   │   ├── enemy.py
+│   │   ├── tower.py
+│   │   └── projectile.py
+│   ├── managers/
+│   │   ├── __init__.py
+│   │   ├── asset_manager.py
+│   │   ├── wave_manager.py
+│   │   └── sound_manager.py
+│   └── ui/
+│       ├── __init__.py
+│       ├── button.py
+│       └── hud.py
+├── main.py
+├── requirements.txt
+└── README.md 
